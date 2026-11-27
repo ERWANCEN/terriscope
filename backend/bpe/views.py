@@ -36,20 +36,38 @@ class EquipementViewSet(viewsets.ReadOnlyModelViewSet):
         if self.action == "retrieve":
             # Fiche : on charge les domaines et le département en une seule requête (jointures)
             return Equipement.objects.select_related("domaine3__domaine2__domaine1", "departement")
-        # Carte : seulement les colonnes affichées. Le code domaine3 est la clé étrangère
-        # elle-même (colonne domaine3_code), donc aucune jointure n'est nécessaire.
-        return Equipement.objects.only("id", "nom", "geom", "domaine3")
+        return Equipement.objects.all()
 
     def get_serializer_class(self):
         if self.action == "retrieve":
             return EquipementDetailSerializer
+        # Utilisé seulement par Swagger pour documenter la liste (voir list ci-dessous)
         return EquipementCarteSerializer
 
     def list(self, request, *args, **kwargs):
         # Jamais toute la région d'un coup : la zone visible est obligatoire
         if "in_bbox" not in request.query_params:
             raise ParseError("Le paramètre in_bbox est obligatoire (minLon,minLat,maxLon,maxLat).")
-        return super().list(request, *args, **kwargs)
+
+        # Filtres habituels : in_bbox (avec garde-fou 1° × 1°), domaines, ville
+        equipements = self.filter_queryset(self.get_queryset())
+
+        # Performance : le GeoJSON est construit à la main au lieu de passer par le serializer DRF.
+        # Mesure sur une tuile dense de 4 921 points : le serializer prenait les 2/3 du temps.
+        # values_list lit seulement 4 colonnes en tuples, sans créer d'objet Django par ligne
+        # (le code domaine3 est la clé étrangère elle-même : aucune jointure).
+        # Le format est identique à celui d'EquipementCarteSerializer.
+        features = [
+            {
+                "id": str(id_equipement),
+                "type": "Feature",
+                "geometry": {"type": "Point", "coordinates": [geom.x, geom.y]},   # lon, lat
+                "properties": {"nom": nom, "domaine3": domaine3},
+            }
+            for id_equipement, nom, domaine3, geom
+            in equipements.values_list("id", "nom", "domaine3", "geom")
+        ]
+        return Response({"type": "FeatureCollection", "features": features})
 
 
 @extend_schema(summary="Arbre des domaines : domaine1 > domaine2 > domaine3")
