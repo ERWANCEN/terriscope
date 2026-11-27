@@ -32,6 +32,15 @@ export function chercherVilles(texte, signal) {
   return lireJson(`/api/villes/?${new URLSearchParams({ search: texte })}`, signal)
 }
 
+export async function chercherAdresses(texte, signal) {
+  const parametres = new URLSearchParams({ q: texte, index: 'address', limit: '5' })
+  const collection = await lireJson(`/api/adresses/?${parametres}`, signal)
+  return collection.features
+    .filter(({ properties, geometry }) => properties?.label && geometry?.type === 'Point'
+      && Number.isFinite(geometry.coordinates?.[0]) && Number.isFinite(geometry.coordinates?.[1]))
+    .map(({ properties, geometry }) => ({ adresse: properties.label, coordonnees: geometry.coordinates }))
+}
+
 export function chargerEmpriseVille(ville, signal) {
   return lireJson(`/api/equipements/emprise-ville/?${new URLSearchParams({ ville })}`, signal)
 }
