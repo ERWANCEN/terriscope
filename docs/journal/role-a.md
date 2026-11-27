@@ -11,3 +11,9 @@
 - Cause : mesure sur la tuile dense, la base n'est pas en cause (index GiST) : 0,12 s pour créer les objets Django et 0,22 s dans le serializer DRF, soit les 2/3 du temps.
 - Solution ou décision : liste carte construite à la main avec `values_list` (format GeoJSON identique, vérifié point par point) et `GZipMiddleware`. Résultat : tuile dense 0,35 s → 0,13 s et 900 → 210 Ko ; zoom 11 : 6,9 s → 1,7 s. Suggestion à B : `ZOOM_MINIMUM` à 12.
 - Temps perdu : environ 15 minutes (diagnostic et mesures).
+
+## 12:11 – API bloquée après un git pull (prospection)
+- Problème : après `git pull origin main`, l'API ne répond plus (réponse vide) ; les logs du backend montrent `RuntimeError: Model class prospection.models.Implantation doesn't declare an explicit app_label and isn't in an application in INSTALLED_APPS`.
+- Cause : le serveur de développement Django recharge le code à chaque modification de fichier. Il a redémarré pendant le pull, quand `urls.py` importait déjà `prospection` mais que `settings.py` ne l'avait pas encore dans `INSTALLED_APPS`, et il est resté bloqué sur cette erreur. Le code final était correct (`manage.py check` sans erreur).
+- Solution ou décision : `docker compose restart backend`. Consigne donnée à l'équipe : si l'API ne répond plus après un pull, redémarrer le backend avant de chercher un bug.
+- Temps perdu : environ 3 minutes.
