@@ -4,6 +4,7 @@ import { chargerImplantations, chargerUtilisateur, deconnecter, lireToken } from
 import FicheEquipement from './components/FicheEquipement.vue'
 import FiltresPanel from './components/FiltresPanel.vue'
 import MapView from './components/MapView.vue'
+import RechercheAdresse from './components/RechercheAdresse.vue'
 import LoginForm from './components/LoginForm.vue'
 import ImplantationForm from './components/ImplantationForm.vue'
 
@@ -155,22 +156,25 @@ function naviguer(cible) {
           </ul>
         </section>
       </div>
-      <div class="exploration">
-        <MapView :filtres="filtres" :implantations="implantations" :mode-ajout="modeAjout" :destination="destination"
-          @selection="ouvrirEquipement" @position="placer" @implantation="ouvrirImplantation" />
-        <ImplantationForm
-          v-if="utilisateur && (position || implantation)"
-          :key="implantation?.id ?? 'nouvelle'"
-          class="edition"
-          :position="position" :implantation="implantation" :domaines="typesCommerce"
-          @enregistre="enregistrer" @supprime="supprimer" @fermer="fermerFormulaire"
-        />
-        <FicheEquipement
-          v-if="equipementSelectionne"
-          :key="equipementSelectionne"
-          :id="equipementSelectionne"
-          @fermer="equipementSelectionne = null"
-        />
+      <div class="colonne-carte">
+        <RechercheAdresse :adresse="destination?.adresse" @localiser="naviguer" @effacer="destination = null" />
+        <div class="exploration">
+          <MapView :filtres="filtres" :implantations="implantations" :mode-ajout="modeAjout" :destination="destination"
+            @selection="ouvrirEquipement" @position="placer" @implantation="ouvrirImplantation" />
+          <ImplantationForm
+            v-if="utilisateur && (position || implantation)"
+            :key="implantation?.id ?? 'nouvelle'"
+            class="edition"
+            :position="position" :implantation="implantation" :domaines="typesCommerce"
+            @enregistre="enregistrer" @supprime="supprimer" @fermer="fermerFormulaire"
+          />
+          <FicheEquipement
+            v-if="equipementSelectionne"
+            :key="equipementSelectionne"
+            :id="equipementSelectionne"
+            @fermer="equipementSelectionne = null"
+          />
+        </div>
       </div>
     </div>
   </main>
@@ -205,6 +209,7 @@ h1 { margin: 0; font: 500 clamp(1.9rem, 4vw, 3.2rem)/1.1 'Spectral', Georgia, se
 .description { margin: .5rem 0 1.1rem; color: #50635c; }
 .atlas { display: grid; grid-template-columns: minmax(15rem, 19rem) minmax(0, 1fr); gap: 1rem; }
 @media (max-width: 760px) { .atlas { grid-template-columns: minmax(0, 1fr); } }
+.colonne-carte { min-width: 0; }
 .exploration { position: relative; isolation: isolate; }
 .exploration > .cadre { z-index: 0; }
 .outils { display: grid; align-content: start; gap: .65rem; }

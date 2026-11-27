@@ -64,6 +64,16 @@ onMounted(() => {
     } else {
       centre = L.GeoJSON.coordsToLatLng(cible.coordonnees)
       zoom = Math.max(16, carte.getZoom())
+      if (cible.adresse) {
+        const repere = L.marker(centre, {
+          icon: L.divIcon({ className: 'repere-adresse', iconSize: [22, 22] }),
+          title: cible.adresse,
+          interactive: false,
+          keyboard: false,
+          zIndexOffset: 1000,
+        }).addTo(carte)
+        nettoyer(() => repere.remove())
+      }
     }
     const animer = !window.matchMedia('(prefers-reduced-motion: reduce)').matches
     conteneur.value.scrollIntoView({ block: 'nearest', inline: 'nearest' })
@@ -124,6 +134,13 @@ onUnmounted(() => {
   font-size: .9rem;
 }
 .carte :deep(.marker-cluster) { background: #17665640; }
+.carte :deep(.repere-adresse) {
+  pointer-events: none;
+  border: 3px solid white;
+  border-radius: 50%;
+  background: #bd4a14;
+  box-shadow: 0 0 0 2px #80300e, 0 1px 7px #0005;
+}
 .carte[data-placement] { cursor: crosshair; }
 .carte[data-placement] :deep(.leaflet-interactive) { pointer-events: none; }
 .indication { pointer-events: none; }
