@@ -67,7 +67,9 @@ onUnmounted(() => requete?.abort())
     <p role="status">{{ message }}</p>
     <ul v-if="resultats.length" aria-label="Adresses trouvées">
       <li v-for="point in resultats" :key="point.adresse + point.coordonnees">
-        <button type="button" @click="localiser(point)">{{ point.adresse }}</button>
+        <button type="button" @click="localiser(point)">
+          {{ point.adresse }}<small v-if="point.horsZone"> · Hors zone</small>
+        </button>
       </li>
     </ul>
     <div v-if="adresse" class="selection">
