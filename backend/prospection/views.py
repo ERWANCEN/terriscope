@@ -1,4 +1,5 @@
-from rest_framework import generics, status, viewsets
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import generics, serializers, status, viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -39,6 +40,15 @@ class RegisterView(generics.CreateAPIView):
 class MeView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        responses=inline_serializer(
+            name="MeResponse",
+            fields={
+                "id": serializers.IntegerField(),
+                "username": serializers.CharField(),
+            },
+        )
+    )
     def get(self, request):
         return Response({
             "id": request.user.id,
