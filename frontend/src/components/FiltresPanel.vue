@@ -2,7 +2,7 @@
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { chargerDomaines, chercherVilles } from '../api.js'
 
-const emit = defineEmits(['filtrer'])
+const emit = defineEmits(['filtrer', 'types-charges'])
 const domaines = ref([])
 const selection = ref(new Set())
 const ouverts = ref(new Set())
@@ -24,6 +24,7 @@ async function lireDomaines() {
   try {
     const arbre = await chargerDomaines(controleur.signal)
     domaines.value = arbre.map(domaine => preparerDomaine(domaine, 1))
+    emit('types-charges', arbre.flatMap(d1 => d1.enfants.flatMap(d2 => d2.enfants)))
   } catch {
     if (!controleur.signal.aborted) erreurDomaines.value = true
   }
