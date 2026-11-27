@@ -21,6 +21,8 @@ urlpatterns = [
     path("api/domaines/", DomaineListView.as_view(), name="domaines"),
     path("api/villes/", VilleListView.as_view(), name="villes"),
     path("api/", include(router.urls)),
+    # Authentification et implantations privées (routes définies dans prospection/urls.py)
+    path("api/", include("prospection.urls")),
     # Documentation de l'API
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
