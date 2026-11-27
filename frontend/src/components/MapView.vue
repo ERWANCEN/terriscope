@@ -5,10 +5,10 @@ import 'leaflet/dist/leaflet.css'
 import 'leaflet.markercluster'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
-import { createLoader, ZOOM_MINIMUM } from '../map/loader.js'
+import { createLoader } from '../map/loader.js'
 
 const conteneur = ref(null)
-const zoomInsuffisant = ref(false)
+const message = ref('')
 let carte
 let arreterChargement
 
@@ -24,8 +24,7 @@ onMounted(() => {
   const clusters = L.markerClusterGroup({
     animate: false, maxClusterRadius: 46, showCoverageOnHover: false,
   })
-  arreterChargement = createLoader(carte, clusters)
-  carte.on('zoomend', () => { zoomInsuffisant.value = carte.getZoom() < ZOOM_MINIMUM })
+  arreterChargement = createLoader(carte, clusters, texte => { message.value = texte })
 })
 
 onUnmounted(() => {
@@ -35,9 +34,9 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <section class="cadre" aria-label="Carte interactive des équipements fictifs de Tours">
+  <section class="cadre" aria-label="Carte interactive des équipements">
     <div ref="conteneur" class="carte"></div>
-    <p v-if="zoomInsuffisant" class="indication" role="status">Zoomez pour voir les équipements</p>
+    <p v-if="message" class="indication" role="status">{{ message }}</p>
   </section>
 </template>
 

@@ -6,7 +6,7 @@ import MapView from './components/MapView.vue'
   <header class="brand"><span aria-hidden="true" class="brand-mark"></span>TerriScope</header>
   <main>
     <h1>Les équipements de Tours</h1>
-    <p class="description">Carte de démonstration · Données fictives</p>
+    <p class="description">Base permanente des équipements · Insee 2025</p>
     <MapView />
   </main>
 </template>
