@@ -1,5 +1,9 @@
 <script setup>
+import { ref } from 'vue'
+import FicheEquipement from './components/FicheEquipement.vue'
 import MapView from './components/MapView.vue'
+
+const equipementSelectionne = ref(null)
 </script>
 
 <template>
@@ -7,7 +11,15 @@ import MapView from './components/MapView.vue'
   <main>
     <h1>Les équipements de Tours</h1>
     <p class="description">Base permanente des équipements · Insee 2025</p>
-    <MapView />
+    <div class="exploration">
+      <MapView @selection="equipementSelectionne = $event" />
+      <FicheEquipement
+        v-if="equipementSelectionne"
+        :key="equipementSelectionne"
+        :id="equipementSelectionne"
+        @fermer="equipementSelectionne = null"
+      />
+    </div>
   </main>
 </template>
 
@@ -38,4 +50,6 @@ body { margin: 0; }
 main { max-width: 112rem; margin: auto; padding: 1.5rem clamp(1rem, 4vw, 4rem); }
 h1 { margin: 0; font: 500 clamp(1.9rem, 4vw, 3.2rem)/1.1 'Spectral', Georgia, serif; }
 .description { margin: .5rem 0 1.1rem; color: #50635c; }
+.exploration { position: relative; isolation: isolate; }
+.exploration > .cadre { z-index: 0; }
 </style>

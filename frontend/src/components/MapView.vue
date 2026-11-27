@@ -8,6 +8,7 @@ import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 import { createLoader } from '../map/loader.js'
 
 const conteneur = ref(null)
+const emit = defineEmits(['selection'])
 const message = ref('')
 let carte
 let arreterChargement
@@ -24,7 +25,10 @@ onMounted(() => {
   const clusters = L.markerClusterGroup({
     animate: false, maxClusterRadius: 46, showCoverageOnHover: false,
   })
-  arreterChargement = createLoader(carte, clusters, texte => { message.value = texte })
+  arreterChargement = createLoader(carte, clusters,
+    texte => { message.value = texte },
+    id => emit('selection', id),
+  )
 })
 
 onUnmounted(() => {
