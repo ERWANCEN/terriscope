@@ -1,0 +1,17 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    { "type": "Feature", "id": 1, "properties": { "nom": "Bibliothèque du Centre" }, "geometry": { "type": "Point", "coordinates": [0.6882, 47.3932] } },
+    { "type": "Feature", "id": 2, "properties": { "nom": "Atelier du Centre" }, "geometry": { "type": "Point", "coordinates": [0.6894, 47.3935] } },
+    { "type": "Feature", "id": 3, "properties": { "nom": "École du Centre" }, "geometry": { "type": "Point", "coordinates": [0.6877, 47.3941] } },
+    { "type": "Feature", "id": 4, "properties": { "nom": "Maison des associations" }, "geometry": { "type": "Point", "coordinates": [0.6901, 47.3943] } },
+    { "type": "Feature", "id": 5, "properties": { "nom": "Gymnase des Halles" }, "geometry": { "type": "Point", "coordinates": [0.6790, 47.3920] } },
+    { "type": "Feature", "id": 6, "properties": { "nom": "Atelier des Halles" }, "geometry": { "type": "Point", "coordinates": [0.6779, 47.3916] } },
+    { "type": "Feature", "id": 7, "properties": { "nom": "École des Halles" }, "geometry": { "type": "Point", "coordinates": [0.6783, 47.3928] } },
+    { "type": "Feature", "id": 8, "properties": { "nom": "Salle de la Gare" }, "geometry": { "type": "Point", "coordinates": [0.6961, 47.3892] } },
+    { "type": "Feature", "id": 9, "properties": { "nom": "Centre sportif de Velpeau" }, "geometry": { "type": "Point", "coordinates": [0.7085, 47.3886] } },
+    { "type": "Feature", "id": 10, "properties": { "nom": "Maison de quartier des Prébendes" }, "geometry": { "type": "Point", "coordinates": [0.6811, 47.3823] } },
+    { "type": "Feature", "id": 11, "properties": { "nom": "Médiathèque du Nord" }, "geometry": { "type": "Point", "coordinates": [0.6832, 47.4084] } },
+    { "type": "Feature", "id": 12, "properties": { "nom": "Terrain des Deux-Lions" }, "geometry": { "type": "Point", "coordinates": [0.6740, 47.3656] } }
+  ]
+}
