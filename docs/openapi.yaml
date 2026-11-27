@@ -1,0 +1,798 @@
+openapi: 3.0.3
+info:
+  title: TerriScope API
+  version: 1.0.0
+  description: Équipements BPE 2025 de la région Centre-Val de Loire et implantations
+    privées.
+paths:
+  /api/auth/me/:
+    get:
+      operationId: auth_me_retrieve
+      tags:
+      - auth
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeResponse'
+          description: ''
+  /api/auth/register/:
+    post:
+      operationId: auth_register_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Register'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Register'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Register'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Register'
+          description: ''
+  /api/auth/token/:
+    post:
+      operationId: auth_token_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AuthToken'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AuthToken'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthToken'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthToken'
+          description: ''
+  /api/domaines/:
+    get:
+      operationId: domaines_list
+      summary: 'Arbre des domaines : domaine1 > domaine2 > domaine3'
+      tags:
+      - domaines
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Domaine1'
+          description: ''
+  /api/equipements/:
+    get:
+      operationId: equipements_list
+      summary: Équipements d'une zone (GeoJSON)
+      parameters:
+      - in: query
+        name: domaine1
+        schema:
+          type: array
+          items:
+            type: string
+        description: Codes domaine1 séparés par des virgules, ex. F,A
+        explode: false
+        style: form
+      - in: query
+        name: domaine2
+        schema:
+          type: array
+          items:
+            type: string
+        description: Codes domaine2 séparés par des virgules, ex. F3,A1
+        explode: false
+        style: form
+      - in: query
+        name: domaine3
+        schema:
+          type: array
+          items:
+            type: string
+        description: Codes domaine3 séparés par des virgules, ex. F307,F303
+        explode: false
+        style: form
+      - in: query
+        name: in_bbox
+        schema:
+          type: string
+        description: 'Zone visible : minLon,minLat,maxLon,maxLat (1° × 1° maximum).
+          Ex. 0.66,47.37,0.72,47.41 (Tours)'
+        required: true
+      - in: query
+        name: ville
+        schema:
+          type: array
+          items:
+            type: string
+        description: Villes séparées par des virgules, ex. Tours,Blois
+        explode: false
+        style: form
+      tags:
+      - equipements
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EquipementCarteList'
+          description: ''
+  /api/equipements/{id}/:
+    get:
+      operationId: equipements_retrieve
+      summary: Fiche complète d'un équipement
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Un(une) Chaîne UUID identifiant ce(cette) equipement.
+        required: true
+      tags:
+      - equipements
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EquipementDetail'
+          description: ''
+  /api/implantations/:
+    get:
+      operationId: implantations_list
+      tags:
+      - implantations
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImplantationList'
+          description: ''
+    post:
+      operationId: implantations_create
+      tags:
+      - implantations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Implantation'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Implantation'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Implantation'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Implantation'
+          description: ''
+  /api/implantations/{id}/:
+    get:
+      operationId: implantations_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un(une) valeur entière unique identifiant ce(cette) implantation.
+        required: true
+      tags:
+      - implantations
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Implantation'
+          description: ''
+    put:
+      operationId: implantations_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un(une) valeur entière unique identifiant ce(cette) implantation.
+        required: true
+      tags:
+      - implantations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Implantation'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Implantation'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Implantation'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Implantation'
+          description: ''
+    patch:
+      operationId: implantations_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un(une) valeur entière unique identifiant ce(cette) implantation.
+        required: true
+      tags:
+      - implantations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedImplantation'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedImplantation'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedImplantation'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Implantation'
+          description: ''
+    delete:
+      operationId: implantations_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: Un(une) valeur entière unique identifiant ce(cette) implantation.
+        required: true
+      tags:
+      - implantations
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/schema/:
+    get:
+      operationId: schema_retrieve
+      description: |-
+        OpenApi3 schema for this API. Format can be selected via content negotiation.
+
+        - YAML: application/vnd.oai.openapi
+        - JSON: application/vnd.oai.openapi+json
+      parameters:
+      - in: query
+        name: format
+        schema:
+          type: string
+          enum:
+          - json
+          - yaml
+      - in: query
+        name: lang
+        schema:
+          type: string
+          enum:
+          - af
+          - ar
+          - ar-dz
+          - ast
+          - az
+          - be
+          - bg
+          - bn
+          - br
+          - bs
+          - ca
+          - ckb
+          - cs
+          - cy
+          - da
+          - de
+          - dsb
+          - el
+          - en
+          - en-au
+          - en-gb
+          - eo
+          - es
+          - es-ar
+          - es-co
+          - es-mx
+          - es-ni
+          - es-ve
+          - et
+          - eu
+          - fa
+          - fi
+          - fr
+          - fy
+          - ga
+          - gd
+          - gl
+          - he
+          - hi
+          - hr
+          - hsb
+          - ht
+          - hu
+          - hy
+          - ia
+          - id
+          - ig
+          - io
+          - is
+          - it
+          - ja
+          - ka
+          - kab
+          - kk
+          - km
+          - kn
+          - ko
+          - ky
+          - lb
+          - lt
+          - lv
+          - mk
+          - ml
+          - mn
+          - mr
+          - ms
+          - my
+          - nb
+          - ne
+          - nl
+          - nn
+          - os
+          - pa
+          - pl
+          - pt
+          - pt-br
+          - ro
+          - ru
+          - sk
+          - sl
+          - sq
+          - sr
+          - sr-latn
+          - sv
+          - sw
+          - ta
+          - te
+          - tg
+          - th
+          - tk
+          - tr
+          - tt
+          - udm
+          - ug
+          - uk
+          - ur
+          - uz
+          - vi
+          - zh-hans
+          - zh-hant
+      tags:
+      - schema
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/vnd.oai.openapi:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/yaml:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/vnd.oai.openapi+json:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/villes/:
+    get:
+      operationId: villes_list
+      summary: Villes (autocomplétion)
+      parameters:
+      - in: query
+        name: search
+        schema:
+          type: string
+        description: 'Début ou partie du nom, ex. tou. Sans ce paramètre : toutes
+          les villes.'
+      tags:
+      - villes
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+          description: ''
+components:
+  schemas:
+    AuthToken:
+      type: object
+      properties:
+        username:
+          type: string
+          writeOnly: true
+          title: Nom de l'utilisateur
+        password:
+          type: string
+          writeOnly: true
+          title: Mot de passe
+        token:
+          type: string
+          readOnly: true
+          title: Jeton
+      required:
+      - password
+      - token
+      - username
+    Domaine1:
+      type: object
+      properties:
+        code:
+          type: string
+          maxLength: 1
+        libelle:
+          type: string
+          maxLength: 255
+        enfants:
+          type: array
+          items:
+            $ref: '#/components/schemas/Domaine2'
+      required:
+      - code
+      - enfants
+      - libelle
+    Domaine2:
+      type: object
+      properties:
+        code:
+          type: string
+          maxLength: 2
+        libelle:
+          type: string
+          maxLength: 255
+        enfants:
+          type: array
+          items:
+            $ref: '#/components/schemas/Domaine3'
+      required:
+      - code
+      - enfants
+      - libelle
+    Domaine3:
+      type: object
+      properties:
+        code:
+          type: string
+          maxLength: 4
+        libelle:
+          type: string
+          maxLength: 255
+      required:
+      - code
+      - libelle
+    EquipementCarte:
+      type: object
+      description: 'Point de la carte : GeoJSON léger (le front en charge des milliers).'
+      properties:
+        type:
+          $ref: '#/components/schemas/GisFeatureEnum'
+        id:
+          type: string
+          format: uuid
+        geometry:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+              - Point
+            coordinates:
+              type: array
+              items:
+                type: number
+                format: float
+              example:
+              - 12.9721
+              - 77.5933
+              minItems: 2
+              maxItems: 3
+        properties:
+          type: object
+          properties:
+            nom:
+              type: string
+              maxLength: 255
+            domaine3:
+              type: string
+    EquipementCarteList:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/GisFeatureCollectionEnum'
+        features:
+          type: array
+          items:
+            $ref: '#/components/schemas/EquipementCarte'
+    EquipementDetail:
+      type: object
+      description: Fiche complète d'un équipement, avec les libellés des 3 niveaux
+        de domaine.
+      properties:
+        id:
+          type: string
+          format: uuid
+        nom:
+          type: string
+          maxLength: 255
+        adresse:
+          type: string
+          maxLength: 255
+        codepostal:
+          type: string
+          maxLength: 5
+        ville:
+          type: string
+          maxLength: 255
+        siret:
+          type: string
+          maxLength: 14
+        departement:
+          type: string
+        domaine1:
+          type: string
+        domaine2:
+          type: string
+        domaine3:
+          type: string
+        domaine3_code:
+          type: string
+        longitude:
+          type: number
+          format: double
+        latitude:
+          type: number
+          format: double
+      required:
+      - departement
+      - domaine1
+      - domaine2
+      - domaine3
+      - domaine3_code
+      - id
+      - latitude
+      - longitude
+      - ville
+    GisFeatureCollectionEnum:
+      type: string
+      enum:
+      - FeatureCollection
+    GisFeatureEnum:
+      type: string
+      enum:
+      - Feature
+    Implantation:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/GisFeatureEnum'
+        id:
+          type: integer
+          readOnly: true
+        geometry:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+              - Point
+            coordinates:
+              type: array
+              items:
+                type: number
+                format: float
+              example:
+              - 12.9721
+              - 77.5933
+              minItems: 2
+              maxItems: 3
+        properties:
+          type: object
+          properties:
+            titre:
+              type: string
+              maxLength: 255
+            domaine3:
+              type: string
+              nullable: true
+            commentaire:
+              type: string
+            cree_le:
+              type: string
+              format: date-time
+              readOnly: true
+            modifie_le:
+              type: string
+              format: date-time
+              readOnly: true
+    ImplantationList:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/GisFeatureCollectionEnum'
+        features:
+          type: array
+          items:
+            $ref: '#/components/schemas/Implantation'
+    MeResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+      required:
+      - id
+      - username
+    PatchedImplantation:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/GisFeatureEnum'
+        id:
+          type: integer
+          readOnly: true
+        geometry:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+              - Point
+            coordinates:
+              type: array
+              items:
+                type: number
+                format: float
+              example:
+              - 12.9721
+              - 77.5933
+              minItems: 2
+              maxItems: 3
+        properties:
+          type: object
+          properties:
+            titre:
+              type: string
+              maxLength: 255
+            domaine3:
+              type: string
+              nullable: true
+            commentaire:
+              type: string
+            cree_le:
+              type: string
+              format: date-time
+              readOnly: true
+            modifie_le:
+              type: string
+              format: date-time
+              readOnly: true
+    Register:
+      type: object
+      properties:
+        username:
+          type: string
+          title: Nom d’utilisateur
+          description: Requis. 150 caractères maximum. Uniquement des lettres, nombres
+            et les caractères « @ », « . », « + », « - » et « _ ».
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        password:
+          type: string
+          writeOnly: true
+      required:
+      - password
+      - username
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
+    tokenAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Token-based authentication with required prefix "Token"
