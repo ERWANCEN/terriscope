@@ -42,7 +42,8 @@ const optionsDomaine3 = computed(() => {
   function parcourir(liste) {
     if (!Array.isArray(liste)) return
     for (const item of liste) {
-      const enfants = item.domaines2 || item.domaines3 || item.children || item.sous_domaines
+      // L'API /api/domaines/ place les sous-niveaux sous la clé "enfants"
+      const enfants = item.enfants || item.domaines2 || item.domaines3 || item.children || item.sous_domaines
       if (Array.isArray(enfants) && enfants.length) {
         parcourir(enfants)
       } else if (item.code && (item.libelle || item.nom)) {
