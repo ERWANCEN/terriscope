@@ -1,0 +1,44 @@
+services:
+  # Base PostgreSQL + PostGIS (image officielle)
+  db:
+    image: postgis/postgis:18-3.6
+    # Image publiée uniquement en amd64 : émulée sur Mac Apple Silicon (plus lent mais fonctionnel)
+    platform: linux/amd64
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql        # chemin modifié à partir de PostgreSQL 18
+    # Port non exposé : seul le backend accède à la base, via le réseau Docker
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      retries: 10
+
+  # API Django, construite avec notre Dockerfile
+  backend:
+    build: ./backend
+    env_file: .env
+    volumes:
+      - ./backend:/app                     # code monté depuis l'hôte
+      - ./data:/data                       # parquet BPE
+    ports: ["8000:8000"]
+    depends_on:
+      db:
+        condition: service_healthy         # attend que la base réponde
+    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+
+  # Serveur de développement Vite (Node ne sert qu'au front)
+  frontend:
+    image: node:lts-slim
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules                  # garde les modules Linux dans le conteneur
+    ports: ["5173:5173"]
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    depends_on: [backend]
+
+volumes:
+  pgdata:
