@@ -1,4 +1,6 @@
 from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 
@@ -22,6 +24,14 @@ class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["username", "password"]
+
+    def validate_password(self, value):
+        # Applique les validateurs Django configurés dans settings.py (longueur, complexité…)
+        try:
+            validate_password(value)
+        except DjangoValidationError as e:
+            raise serializers.ValidationError(list(e.messages))
+        return value
 
     def create(self, validated_data):
         # create_user chiffre automatiquement le mot de passe en base
