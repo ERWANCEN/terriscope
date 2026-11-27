@@ -35,3 +35,118 @@ export function chercherVilles(texte, signal) {
 export function chargerFicheEquipement(id, signal) {
   return lireJson(`/api/equipements/${encodeURIComponent(id)}/`, signal)
 }
+
+
+// --- Authentification & Implantations privées (Rôle C) ---
+
+const CLE_TOKEN = 'terriscope_token'
+
+export function lireToken() {
+  return localStorage.getItem(CLE_TOKEN)
+}
+
+export function enregistrerToken(token) {
+  localStorage.setItem(CLE_TOKEN, token)
+}
+
+export function supprimerToken() {
+  localStorage.removeItem(CLE_TOKEN)
+}
+
+async function requeteApi(url, options = {}) {
+  const token = lireToken()
+  const headers = {
+    Accept: 'application/json',
+    ...options.headers,
+  }
+  if (options.body) headers['Content-Type'] = 'application/json'
+  if (token) headers.Authorization = `Token ${token}`
+
+  const reponse = await fetch(url, { ...options, headers })
+
+  if (reponse.status === 204) return null
+
+  const donnees = await reponse.json().catch(() => null)
+  if (!reponse.ok) {
+    const message = extraireMessageErreur(donnees) || `Erreur HTTP ${reponse.status}`
+    throw new Error(message)
+  }
+  return donnees
+}
+
+function extraireMessageErreur(donnees) {
+  if (!donnees || typeof donnees !== 'object') return null
+  if (donnees.detail) return donnees.detail
+  if (donnees.non_field_errors) return donnees.non_field_errors.join(' ')
+  return Object.values(donnees).flat().join(' ')
+}
+
+export async function connecter(username, password) {
+  const donnees = await requeteApi('/api/auth/token/', {
+    method: 'POST',
+    body: JSON.stringify({ username, password }),
+  })
+  enregistrerToken(donnees.token)
+  return donnees.token
+}
+
+export async function inscrire(username, password) {
+  const donnees = await requeteApi('/api/auth/register/', {
+    method: 'POST',
+    body: JSON.stringify({ username, password }),
+  })
+  enregistrerToken(donnees.token)
+  return donnees.token
+}
+
+export function deconnecter() {
+  supprimerToken()
+}
+
+export function chargerUtilisateur() {
+  return requeteApi('/api/auth/me/')
+}
+
+export async function chargerImplantations() {
+  const collection = await requeteApi('/api/implantations/')
+  return collection.features || []
+}
+
+export function creerImplantation({ titre, domaine3, commentaire, lon, lat }) {
+  return requeteApi('/api/implantations/', {
+    method: 'POST',
+    body: JSON.stringify({
+      type: 'Feature',
+      geometry: { type: 'Point', coordinates: [lon, lat] },
+      properties: {
+        titre,
+        domaine3: domaine3 || null,
+        commentaire: commentaire || '',
+      },
+    }),
+  })
+}
+
+export function modifierImplantation(id, { titre, domaine3, commentaire, lon, lat }) {
+  const payload = {
+    type: 'Feature',
+    properties: {
+      titre,
+      domaine3: domaine3 || null,
+      commentaire: commentaire || '',
+    },
+  }
+  if (lon != null && lat != null) {
+    payload.geometry = { type: 'Point', coordinates: [lon, lat] }
+  }
+  return requeteApi(`/api/implantations/${encodeURIComponent(id)}/`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+  })
+}
+
+export function supprimerImplantation(id) {
+  return requeteApi(`/api/implantations/${encodeURIComponent(id)}/`, {
+    method: 'DELETE',
+  })
+}
