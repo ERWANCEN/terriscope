@@ -1,7 +1,7 @@
 """Vues publiques du référentiel BPE : carte, fiche, arbre des domaines, villes."""
 
 from django.contrib.gis.db.models.aggregates import Extent
-from django.db.models import Prefetch
+from django.db.models import Case, Prefetch, Value, When
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
 from rest_framework import generics, serializers, viewsets
@@ -12,7 +12,9 @@ from rest_framework.views import APIView
 
 from .filters import EquipementFilter, InBBoxLimiteFilter
 from .models import Domaine1, Domaine2, Domaine3, Equipement
-from .serializers import Domaine1Serializer, EquipementCarteSerializer, EquipementDetailSerializer
+from .serializers import (
+    Domaine1Serializer, EquipementCarteSerializer, EquipementDetailSerializer, EquipementRechercheSerializer,
+)
 
 
 @extend_schema_view(
@@ -60,6 +62,28 @@ class EquipementViewSet(viewsets.ReadOnlyModelViewSet):
         if emprise is None:
             raise NotFound("Aucun équipement géolocalisé pour cette ville.")
         return Response(emprise)
+
+    @extend_schema(
+        summary="Rechercher jusqu’à dix équipements par nom dans la région",
+        parameters=[OpenApiParameter("search", str, required=True, description="Fragment du nom (3 à 255 caractères).")],
+        responses=EquipementRechercheSerializer(many=True),
+    )
+    @action(detail=False, url_path="recherche", filter_backends=[])
+    def recherche(self, request):
+        texte = request.query_params.get("search", "").strip()
+        if not 3 <= len(texte) <= 255:
+            raise ParseError("Saisissez entre 3 et 255 caractères du nom de l’équipement.")
+        pertinence = Case(
+            When(nom__iexact=texte, then=Value(0)),
+            When(nom__istartswith=texte, then=Value(1)),
+            default=Value(2),
+        )
+        equipements = (
+            self.get_queryset().filter(nom__icontains=texte)
+            .only("id", "nom", "adresse", "codepostal", "ville", "geom")
+            .order_by(pertinence, "nom", "ville", "adresse", "id")[:10]
+        )
+        return Response(EquipementRechercheSerializer(equipements, many=True).data)
 
     def list(self, request, *args, **kwargs):
         # Jamais toute la région d'un coup : la zone visible est obligatoire
