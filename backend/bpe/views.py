@@ -1,10 +1,12 @@
 """Vues publiques du référentiel BPE : carte, fiche, arbre des domaines, villes."""
 
+from django.contrib.gis.db.models.aggregates import Extent
 from django.db.models import Prefetch
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
 from rest_framework import generics, serializers, viewsets
-from rest_framework.exceptions import ParseError
+from rest_framework.decorators import action
+from rest_framework.exceptions import NotFound, ParseError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -43,6 +45,21 @@ class EquipementViewSet(viewsets.ReadOnlyModelViewSet):
             return EquipementDetailSerializer
         # Utilisé seulement par Swagger pour documenter la liste (voir list ci-dessous)
         return EquipementCarteSerializer
+
+    @extend_schema(
+        summary="Emprise des équipements d'une ville (ouest, sud, est, nord)",
+        parameters=[OpenApiParameter("ville", str, required=True, description="Nom exact issu de /api/villes/")],
+        responses=serializers.ListSerializer(child=serializers.FloatField()),
+    )
+    @action(detail=False, url_path="emprise-ville", filter_backends=[])
+    def emprise_ville(self, request):
+        ville = request.query_params.get("ville", "").strip()
+        if not ville:
+            raise ParseError("Le nom de la ville est obligatoire.")
+        emprise = Equipement.objects.filter(ville=ville).aggregate(bbox=Extent("geom"))["bbox"]
+        if emprise is None:
+            raise NotFound("Aucun équipement géolocalisé pour cette ville.")
+        return Response(emprise)
 
     def list(self, request, *args, **kwargs):
         # Jamais toute la région d'un coup : la zone visible est obligatoire

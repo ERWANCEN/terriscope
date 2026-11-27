@@ -5,17 +5,20 @@ import 'leaflet/dist/leaflet.css'
 import 'leaflet.markercluster'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
-import { createLoader } from '../map/loader.js'
+import { createLoader, ZOOM_MINIMUM } from '../map/loader.js'
 import { creerCoucheImplantations } from '../map/implantationsLayer.js'
+import { chargerEmpriseVille } from '../api.js'
 
 const conteneur = ref(null)
 const props = defineProps({
   filtres: { type: Object, required: true },
   implantations: { type: Array, required: true },
   modeAjout: Boolean,
+  destination: Object,
 })
 const emit = defineEmits(['selection', 'position', 'implantation'])
 const message = ref('')
+const erreurNavigation = ref('')
 let carte
 let arreterChargement
 let couchePrivee
@@ -36,6 +39,35 @@ onMounted(() => {
   watch(() => props.modeAjout, actif => { if (actif) carte.closePopup() })
   carte.on('click', ({ latlng }) => {
     if (props.modeAjout) emit('position', { lon: latlng.lng, lat: latlng.lat })
+  })
+
+  watch(() => props.destination, async (cible, _, nettoyer) => {
+    erreurNavigation.value = ''
+    if (!cible) return
+    const requete = new AbortController()
+    nettoyer(() => {
+      requete.abort()
+      carte.stop()
+    })
+    let centre, zoom
+    if (cible.ville) {
+      try {
+        const [ouest, sud, est, nord] = await chargerEmpriseVille(cible.ville, requete.signal)
+        if (requete.signal.aborted) return
+        const limites = L.latLngBounds([sud, ouest], [nord, est])
+        centre = limites.getCenter()
+        zoom = Math.max(ZOOM_MINIMUM, Math.min(15, carte.getBoundsZoom(limites, false, L.point(48, 48))))
+      } catch {
+        if (!requete.signal.aborted) erreurNavigation.value = `Impossible de centrer la carte sur ${cible.ville}.`
+        return
+      }
+    } else {
+      centre = L.GeoJSON.coordsToLatLng(cible.coordonnees)
+      zoom = Math.max(16, carte.getZoom())
+    }
+    const animer = !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    conteneur.value.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+    carte.flyTo(centre, zoom, { animate: animer, duration: .8 })
   })
 
   const clusters = L.markerClusterGroup({
@@ -62,8 +94,8 @@ onUnmounted(() => {
 <template>
   <section class="cadre" aria-label="Carte interactive des équipements">
     <div ref="conteneur" class="carte" :data-placement="modeAjout || null"></div>
-    <p v-if="modeAjout || message" class="indication" role="status">
-      {{ modeAjout ? 'Cliquez sur la carte pour placer votre implantation.' : message }}
+    <p v-if="modeAjout || erreurNavigation || message" class="indication" role="status">
+      {{ modeAjout ? 'Cliquez sur la carte pour placer votre implantation.' : erreurNavigation || message }}
     </p>
   </section>
 </template>
