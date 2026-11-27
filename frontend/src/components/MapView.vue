@@ -64,10 +64,10 @@ onMounted(() => {
     } else {
       centre = L.GeoJSON.coordsToLatLng(cible.coordonnees)
       zoom = Math.max(16, carte.getZoom())
-      if (cible.adresse) {
+      if (cible.adresse || cible.equipement) {
         const repere = L.marker(centre, {
-          icon: L.divIcon({ className: 'repere-adresse', iconSize: [22, 22] }),
-          title: cible.adresse,
+          icon: L.divIcon({ className: cible.equipement ? 'repere-equipement' : 'repere-adresse', iconSize: [22, 22] }),
+          title: cible.equipement?.nom ?? cible.adresse,
           interactive: false,
           keyboard: false,
           zIndexOffset: 1000,
@@ -134,6 +134,13 @@ onUnmounted(() => {
   font-size: .9rem;
 }
 .carte :deep(.marker-cluster) { background: #17665640; }
+.carte :deep(.repere-equipement) {
+  pointer-events: none;
+  border: 3px solid white;
+  border-radius: 50%;
+  background: #175749;
+  box-shadow: 0 0 0 3px #175749;
+}
 .carte :deep(.repere-adresse) {
   pointer-events: none;
   border: 3px solid white;

@@ -5,6 +5,7 @@ import FicheEquipement from './components/FicheEquipement.vue'
 import FiltresPanel from './components/FiltresPanel.vue'
 import MapView from './components/MapView.vue'
 import RechercheAdresse from './components/RechercheAdresse.vue'
+import RechercheEquipement from './components/RechercheEquipement.vue'
 import LoginForm from './components/LoginForm.vue'
 import ImplantationForm from './components/ImplantationForm.vue'
 
@@ -114,14 +115,19 @@ function supprimer(id) {
 
 function filtrer(selection) {
   if (destination.value?.ville && !selection.villes.includes(destination.value.ville)) destination.value = null
-  equipementSelectionne.value = null
+  fermerFiche()
   filtres.value = selection
 }
 
 function naviguer(cible) {
   fermerFormulaire()
-  equipementSelectionne.value = null
+  equipementSelectionne.value = cible.equipement?.id ?? null
   destination.value = cible
+}
+
+function fermerFiche() {
+  equipementSelectionne.value = null
+  if (destination.value?.equipement) destination.value = null
 }
 </script>
 
@@ -157,6 +163,7 @@ function naviguer(cible) {
         </section>
       </div>
       <div class="colonne-carte">
+        <RechercheEquipement @selection="point => naviguer({ equipement: point, coordonnees: [point.longitude, point.latitude] })" />
         <RechercheAdresse :adresse="destination?.adresse" @localiser="naviguer" @effacer="destination = null" />
         <div class="exploration">
           <MapView :filtres="filtres" :implantations="implantations" :mode-ajout="modeAjout" :destination="destination"
@@ -172,7 +179,7 @@ function naviguer(cible) {
             v-if="equipementSelectionne"
             :key="equipementSelectionne"
             :id="equipementSelectionne"
-            @fermer="equipementSelectionne = null"
+            @fermer="fermerFiche"
           />
         </div>
       </div>

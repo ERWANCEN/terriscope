@@ -49,6 +49,10 @@ export function chargerFicheEquipement(id, signal) {
   return lireJson(`/api/equipements/${encodeURIComponent(id)}/`, signal)
 }
 
+export function chercherEquipements(nom, signal) {
+  return lireJson(`/api/equipements/recherche/?${new URLSearchParams({ search: nom })}`, signal)
+}
+
 
 // --- Authentification & Implantations privées (Rôle C) ---
 

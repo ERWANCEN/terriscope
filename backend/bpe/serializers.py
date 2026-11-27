@@ -15,7 +15,16 @@ class EquipementCarteSerializer(GeoFeatureModelSerializer):
         fields = ["id", "nom", "domaine3"]       # id sort au niveau de la Feature, le reste dans "properties"
 
 
-class EquipementDetailSerializer(serializers.ModelSerializer):
+class EquipementRechercheSerializer(serializers.ModelSerializer):
+    longitude = serializers.FloatField(source="geom.x")
+    latitude = serializers.FloatField(source="geom.y")
+
+    class Meta:
+        model = Equipement
+        fields = ["id", "nom", "adresse", "codepostal", "ville", "longitude", "latitude"]
+
+
+class EquipementDetailSerializer(EquipementRechercheSerializer):
     """Fiche complète d'un équipement, avec les libellés des 3 niveaux de domaine."""
 
     departement = serializers.CharField(source="departement.libelle")
@@ -23,8 +32,6 @@ class EquipementDetailSerializer(serializers.ModelSerializer):
     domaine2 = serializers.CharField(source="domaine3.domaine2.libelle")
     domaine3 = serializers.CharField(source="domaine3.libelle")
     domaine3_code = serializers.CharField(source="domaine3.code")
-    longitude = serializers.FloatField(source="geom.x")
-    latitude = serializers.FloatField(source="geom.y")
 
     class Meta:
         model = Equipement
