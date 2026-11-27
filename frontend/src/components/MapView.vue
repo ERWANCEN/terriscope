@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet.markercluster'
@@ -8,6 +8,7 @@ import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 import { createLoader } from '../map/loader.js'
 
 const conteneur = ref(null)
+const props = defineProps({ filtres: { type: Object, required: true } })
 const emit = defineEmits(['selection'])
 const message = ref('')
 let carte
@@ -25,10 +26,15 @@ onMounted(() => {
   const clusters = L.markerClusterGroup({
     animate: false, maxClusterRadius: 46, showCoverageOnHover: false,
   })
-  arreterChargement = createLoader(carte, clusters,
-    texte => { message.value = texte },
-    id => emit('selection', id),
-  )
+  watch(() => props.filtres, filtres => {
+    arreterChargement?.()
+    clusters.clearLayers()
+    arreterChargement = createLoader(carte, clusters,
+      texte => { message.value = texte },
+      id => emit('selection', id),
+      filtres,
+    )
+  }, { immediate: true })
 })
 
 onUnmounted(() => {

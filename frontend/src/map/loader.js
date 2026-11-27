@@ -4,7 +4,7 @@ import { chargerEquipements } from '../api.js'
 export const ZOOM_MINIMUM = 11
 const ZOOM_GRILLE = 12
 
-export function createLoader(map, cluster, afficherMessage, selectionnerEquipement) {
+export function createLoader(map, cluster, afficherMessage, selectionnerEquipement, filtres) {
   const tuiles = new Map()
   const idsAffiches = new Set()
   const controleur = new AbortController()
@@ -18,7 +18,7 @@ export function createLoader(map, cluster, afficherMessage, selectionnerEquipeme
     const nordOuest = map.unproject(L.point(x, y).multiplyBy(256), ZOOM_GRILLE)
     const sudEst = map.unproject(L.point(x + 1, y + 1).multiplyBy(256), ZOOM_GRILLE)
     const bbox = [nordOuest.lng, sudEst.lat, sudEst.lng, nordOuest.lat]
-    const points = await chargerEquipements(bbox, controleur.signal)
+    const points = await chargerEquipements(bbox, controleur.signal, filtres)
     if (controleur.signal.aborted) return 0
 
     const marqueurs = []
