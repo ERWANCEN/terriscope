@@ -2,7 +2,7 @@
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { chargerDomaines, chercherVilles } from '../api.js'
 
-const emit = defineEmits(['filtrer', 'types-charges'])
+const emit = defineEmits(['filtrer', 'types-charges', 'centrer-ville'])
 const domaines = ref([])
 const selection = ref(new Set())
 const ouverts = ref(new Set())
@@ -103,9 +103,11 @@ const villeChoisie = computed(() => villesDisponibles.value.find(nom =>
 
 function ajouterVille() {
   if (!villeChoisie.value) return
-  villes.value.push(villeChoisie.value)
+  const ville = villeChoisie.value
+  villes.value.push(ville)
   recherche.value = ''
   appliquer()
+  emit('centrer-ville', ville)
 }
 
 function retirerVille(ville) {
@@ -139,7 +141,8 @@ function effacer() {
       <p v-if="erreurVilles" role="status">Recherche indisponible. Relancez la saisie.</p>
       <ul v-if="villes.length" class="villes">
         <li v-for="ville in villes" :key="ville">
-          <button type="button" :aria-label="`Retirer ${ville}`" @click="retirerVille(ville)">{{ ville }} ×</button>
+          <button type="button" :aria-label="`Centrer sur ${ville}`" @click="emit('centrer-ville', ville)">{{ ville }}</button>
+          <button type="button" :aria-label="`Retirer ${ville}`" @click="retirerVille(ville)">×</button>
         </li>
       </ul>
     </form>
@@ -177,7 +180,8 @@ button { color: #175749; border: 1px solid #c7d1c7; background: #fff; border-rad
 button:disabled { opacity: .55; cursor: default; }
 .saisie input { min-width: 0; width: 100%; padding: .4rem; border: 1px solid #9caea3; border-radius: .3rem; }
 .villes { display: flex; flex-wrap: wrap; gap: .3rem; padding: 0; margin: .6rem 0 0; list-style: none; }
-.villes button { border-radius: 1rem; background: #e4efe7; }
+.villes li { display: flex; align-items: center; padding: 0 .25rem; border: 1px solid #c7d1c7; border-radius: 1rem; background: #e4efe7; }
+.villes button { border: 0; background: transparent; }
 fieldset { min-width: 0; margin: 1rem 0 0; padding: 0; border: 0; }
 .arbre { max-height: 48vh; overflow: auto; }
 .ligne { min-height: 2rem; gap: .15rem; }

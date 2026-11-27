@@ -32,6 +32,10 @@ export function chercherVilles(texte, signal) {
   return lireJson(`/api/villes/?${new URLSearchParams({ search: texte })}`, signal)
 }
 
+export function chargerEmpriseVille(ville, signal) {
+  return lireJson(`/api/equipements/emprise-ville/?${new URLSearchParams({ ville })}`, signal)
+}
+
 export function chargerFicheEquipement(id, signal) {
   return lireJson(`/api/equipements/${encodeURIComponent(id)}/`, signal)
 }
