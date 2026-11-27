@@ -4,7 +4,7 @@ import { chargerEquipements } from '../api.js'
 export const ZOOM_MINIMUM = 11
 const ZOOM_GRILLE = 12
 
-export function createLoader(map, cluster, afficherMessage) {
+export function createLoader(map, cluster, afficherMessage, selectionnerEquipement) {
   const tuiles = new Map()
   const idsAffiches = new Set()
   const controleur = new AbortController()
@@ -29,7 +29,7 @@ export function createLoader(map, cluster, afficherMessage) {
       nom.textContent = point.properties.nom
       marqueurs.push(L.circleMarker(position, {
         radius: 7, color: '#fff', weight: 2, fillColor: '#166756', fillOpacity: 1,
-      }).bindPopup(nom))
+      }).bindPopup(nom).on('click', () => selectionnerEquipement(point.id)))
       idsAffiches.add(point.id)
     }
     if (marqueurs.length) cluster.addLayers(marqueurs)
