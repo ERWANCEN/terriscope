@@ -104,6 +104,9 @@ onUnmounted(() => {
 <template>
   <section class="cadre" aria-label="Carte interactive des équipements">
     <div ref="conteneur" class="carte" :data-placement="modeAjout || null"></div>
+    <p v-if="destination?.horsZone" class="indication hors-zone" role="status">
+      Cette adresse est hors zone. TerriScope couvre les équipements du Centre-Val de Loire.
+    </p>
     <p v-if="modeAjout || erreurNavigation || message" class="indication" role="status">
       {{ modeAjout ? 'Cliquez sur la carte pour placer votre implantation.' : erreurNavigation || message }}
     </p>
@@ -144,5 +147,13 @@ onUnmounted(() => {
 .carte[data-placement] { cursor: crosshair; }
 .carte[data-placement] :deep(.leaflet-interactive) { pointer-events: none; }
 .indication { pointer-events: none; }
+.hors-zone {
+  top: .65rem;
+  bottom: auto;
+  max-width: calc(100% - 6rem);
+  background: #fff4d9;
+  border: 1px solid #b48a46;
+  color: #573a0c;
+}
 .carte :deep(.marker-cluster div) { background: #175749; color: white; font-weight: bold; }
 </style>

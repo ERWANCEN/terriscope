@@ -32,13 +32,25 @@ export function chercherVilles(texte, signal) {
   return lireJson(`/api/villes/?${new URLSearchParams({ search: texte })}`, signal)
 }
 
+const departementsCentreValDeLoire = new Set(['18', '28', '36', '37', '41', '45'])
+
+function adresseHorsZone(codeCommune) {
+  // Le code INSEE identifie la commune même si son code postal dessert un autre département.
+  return typeof codeCommune === 'string' && /^(?:\d{5}|2[AB]\d{3})$/.test(codeCommune)
+    && !departementsCentreValDeLoire.has(codeCommune.slice(0, 2))
+}
+
 export async function chercherAdresses(texte, signal) {
   const parametres = new URLSearchParams({ q: texte, index: 'address', limit: '5' })
   const collection = await lireJson(`/api/adresses/?${parametres}`, signal)
   return collection.features
     .filter(({ properties, geometry }) => properties?.label && geometry?.type === 'Point'
       && Number.isFinite(geometry.coordinates?.[0]) && Number.isFinite(geometry.coordinates?.[1]))
-    .map(({ properties, geometry }) => ({ adresse: properties.label, coordonnees: geometry.coordinates }))
+    .map(({ properties, geometry }) => ({
+      adresse: properties.label,
+      coordonnees: geometry.coordinates,
+      horsZone: adresseHorsZone(properties.citycode),
+    }))
 }
 
 export function chargerEmpriseVille(ville, signal) {
