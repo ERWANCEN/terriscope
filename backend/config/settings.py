@@ -41,6 +41,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    # Compresse les réponses (le GeoJSON d'une tuile dense passe d'environ 900 Ko à 200 Ko).
+    # En premier : il doit traiter la réponse finale, après tous les autres middlewares.
+    "django.middleware.gzip.GZipMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
