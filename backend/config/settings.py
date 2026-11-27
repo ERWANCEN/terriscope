@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "drf_spectacular",               # documentation OpenAPI / Swagger
     # Applications TerriScope
     "bpe",                           # référentiel BPE en lecture seule
+    "prospection",                   # implantations privées + authentification (rôle C)
 ]
 
 MIDDLEWARE = [
