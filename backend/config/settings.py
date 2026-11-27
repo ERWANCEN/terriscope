@@ -36,6 +36,8 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",      # authentification par token
     "django_filters",                # filtres déclaratifs (?domaine1=…&ville=…)
     "drf_spectacular",               # documentation OpenAPI / Swagger
+    # Applications TerriScope
+    "bpe",                           # référentiel BPE en lecture seule
 ]
 
 MIDDLEWARE = [
