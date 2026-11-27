@@ -12,6 +12,7 @@
 | --- | --- | --- |
 | `GET /api/equipements/?in_bbox=…` | Équipements d'une zone (GeoJSON léger) | Public |
 | `GET /api/equipements/{id}/` | Fiche complète d'un équipement | Public |
+| `GET /api/equipements/emprise-ville/?ville=…` | Emprise des équipements d'une ville (pour centrer la carte) | Public |
 | `GET /api/domaines/` | Arbre domaine1 > domaine2 > domaine3 | Public |
 | `GET /api/villes/?search=…` | Autocomplétion des villes | Public |
 | `POST /api/auth/register/` | Inscription, renvoie un token | Public |
@@ -110,6 +111,21 @@ Fiche complète. `404` si l'identifiant (UUID) n'existe pas.
   "latitude": 47.38025
 }
 ```
+
+### `GET /api/equipements/emprise-ville/`
+
+Rectangle englobant les équipements d'une ville, calculé par PostGIS (`Extent`). Le front s'en sert
+pour centrer et zoomer la carte quand on choisit une ville dans les filtres.
+
+| Paramètre | Obligatoire | Description |
+| --- | --- | --- |
+| `ville` | oui | Nom exact, tel que renvoyé par `/api/villes/` |
+
+Exemple : `GET /api/equipements/emprise-ville/?ville=Tours` → `[0.662, 47.35017, 0.73671, 47.43869]`
+(ouest, sud, est, nord, soit `minLon, minLat, maxLon, maxLat`).
+
+Erreurs : `400` si `ville` est absent (`{"detail": "Le nom de la ville est obligatoire."}`),
+`404` si aucun équipement géolocalisé ne porte ce nom (`{"detail": "Aucun équipement géolocalisé pour cette ville."}`).
 
 ### `GET /api/domaines/`
 
